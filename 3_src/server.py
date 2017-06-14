@@ -17,11 +17,12 @@ def full_model_handler():
         new_patient = model.df_transform(input_data)
         # Run model on input data here
         prediction = model.full_predict(new_patient)
-        data = { 'LOS > 3': prediction}
+        data = {    'LOS > 3': prediction
+                    'confidence_score': score
+                    }
         return jsonify(data)
 
         except Exception, e:
-
             return jsonify({'error': str(e), 'trace': traceback.format_exc()})
     else:
         print 'train first'
@@ -55,7 +56,7 @@ def sparse_model_handler():
 # Pros: Tries to work in trade-off between sparse and full model predictions
 # Cons: Trying to do both may lead to being good at neither
 @app.route('/predict_hybrid', methods=['POST'])
-def full_model_handler():
+def hybrid_model_handler():
     if request.method == 'POST':
         # Print JSON data
         input_data = request.get_json(force=True)
@@ -80,6 +81,29 @@ def full_model_handler():
 # Cons: Unlikely that sufficient high throughput will occur
 @app.route('/predict_nn', methods=['POST'])
 def full_model_handler():
+    if request.method == 'POST':
+        # Print JSON data
+        input_data = request.get_json(force=True)
+        # Read the test key from received JSON
+        print input_data['test']
+        # JSON to Index or pd.df
+        new_patient = model.df_transform(input_data)
+        # Run model on input data here
+        prediction = model.predict_nn(new_patient)
+        data = { 'LOS > 3': prediction}
+        return jsonify(data)
+
+        except Exception, e:
+
+            return jsonify({'error': str(e), 'trace': traceback.format_exc()})
+    else:
+        print 'train first'
+        return 'no model here'
+# Router for prediction using neural network
+# Pros: Will likely outperform other models at high data throughput
+# Cons: Unlikely that sufficient high throughput will occur
+@app.route('/predict_best_model', methods=['POST'])
+def best_model_handler():
     if request.method == 'POST':
         # Print JSON data
         input_data = request.get_json(force=True)
@@ -123,6 +147,7 @@ def retrain(model,data):
     else:
         print 'please make sure selection was a serviceable model'
         return 'error in model retraining'
+
 
 @app.route('/create_best_model', methods=['POST'])
 def best_model(data,perf_metrics):

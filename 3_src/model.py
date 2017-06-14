@@ -4,7 +4,6 @@ from sklearn.externals import joblib
 
 best_perf_model = joblib.load()
 
-
 # Set of prediction functions that expect
 # a singular |patient_data| in the form of Index or pd.df
 # and returns boolean:
@@ -13,27 +12,32 @@ best_perf_model = joblib.load()
 
 # predict using full feature model
 def full_predict(patient_data):
-    los = True;
-    return los;
+    los = True
+    return los
 
 # predict using sparse model
 def sparse_predict(patient_data):
-    los = True;
-    return los;
+    los = True
+    return los
 
 # predict using hybrid model
 def hybrid_predict(patient_data):
-    los = True;
-    return los;
+    los = True
+    return los
 
 # predict using neural net model
 def nn_predict(patient_data):
-    los = True;
-    return los;
+    los = True
+    return los
+
+# predict using current best performing model
+def bm_predict(patient_data):
+    los = True
+    return los
 
 # trains selected model on given data
 # manual selection of features optional
-def train(data,model_type,selection):
+def train(data,model_type,selection,perf_metrics):
     data = df_transform(data)
 
     if(selection):
@@ -44,8 +48,10 @@ def train(data,model_type,selection):
         generate_hybrid_model(data)
     else if(model_type = "nn"):
         generate_nn(data)
+    else if(model_type = "best"):
+        generate_best_model(data,perf_metrics)
     else:
-        generate_full_model(data)
+        print 'one of your inputs is wrongly formatted'
 
 # generates selected model based on given model_type request
 # Note to reader: These functions are currently being tested in notebooks
@@ -57,6 +63,8 @@ def generate_sparse_model(data):
 def generate_hybrid_model(data):
     return pickle
 def generate_nn(data):
+    return pickle
+def generate_best_model(data,perf_metrics):
     return pickle
 
 # Reduces a dataset using set of feature reduction techniques
@@ -90,7 +98,7 @@ def feature_selection_technique_eval(feat_ranking):
 # Evaluates model performance against perf_metrics supplied
 # returns best model stored as .pkl
 # Warning: calling this function takes a long time
-def create_best_model(data,perf_metrics):
+def generate_best_model(data,perf_metrics):
 
 # Identifies dataset format
 # Coerces dataset into usable pd.df
