@@ -17,7 +17,7 @@ def full_model_handler():
         new_patient = model.df_transform(input_data)
         # Run model on input data here
         prediction = model.full_predict(new_patient)
-        data = {    'LOS > 3': prediction
+        data = {    'LOS': prediction
                     'confidence_score': score
                     }
         return jsonify(data)
@@ -42,7 +42,7 @@ def sparse_model_handler():
         new_patient = model.df_transform(input_data)
         # Run model on input data here
         prediction = model.sparse_predict(new_patient)
-        data = { 'LOS > 3': prediction}
+        data = { 'LOS': prediction}
         return jsonify(data)
 
         except Exception, e:
@@ -66,7 +66,7 @@ def hybrid_model_handler():
         new_patient = model.df_transform(input_data)
         # Run model on input data here
         prediction = model.hybrid_predict(new_patient)
-        data = { 'LOS > 3': prediction}
+        data = { 'LOS': prediction}
         return jsonify(data)
 
         except Exception, e:
@@ -90,7 +90,7 @@ def full_model_handler():
         new_patient = model.df_transform(input_data)
         # Run model on input data here
         prediction = model.predict_nn(new_patient)
-        data = { 'LOS > 3': prediction}
+        data = { 'LOS': prediction}
         return jsonify(data)
 
         except Exception, e:
@@ -99,9 +99,7 @@ def full_model_handler():
     else:
         print 'train first'
         return 'no model here'
-# Router for prediction using neural network
-# Pros: Will likely outperform other models at high data throughput
-# Cons: Unlikely that sufficient high throughput will occur
+
 @app.route('/predict_best_model', methods=['POST'])
 def best_model_handler():
     if request.method == 'POST':
@@ -122,6 +120,32 @@ def best_model_handler():
     else:
         print 'train first'
         return 'no model here'
+
+# Expects array of JSON objects
+# Each JSON object is patient_data
+# Append LOS_bool and confidence_score
+@app.route('/batch_predict', methods=['POST'])
+def retrain(model,data):
+
+    model.df_transform(data)
+
+    if(model == "full"):
+        model.generate_full_model(data)
+
+    else if(model == "sparse"):
+        model.generate_sparse_model(data)
+
+    else if(model == "hybrid"):
+        model.generate_hybrid_model(data)
+
+    else if(model == "nn"):
+        model.generate_nn(data)
+
+    else:
+        print 'please make sure selection was a serviceable model'
+        return 'error in model retraining'
+
+
 
 # Router for command to retrain a given model
 # Expects JSON with:
@@ -148,7 +172,6 @@ def retrain(model,data):
         print 'please make sure selection was a serviceable model'
         return 'error in model retraining'
 
-
 @app.route('/create_best_model', methods=['POST'])
 def best_model(data,perf_metrics):
     data = model.df_transform(data)
@@ -173,4 +196,4 @@ if __name__ == '__main__':
         print str(e)
         clf = None
 
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
